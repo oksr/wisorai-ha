@@ -1,14 +1,11 @@
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Stack, TextField, Button, Typography, Grid, Paper, Avatar } from "@mui/material";
-import { alpha, styled } from "@mui/material/styles";
+import { Stack, TextField, Button, Typography, Grid, Paper, Avatar } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import * as yup from "yup";
-import { updateEmployeeData, setIsEdit } from "../../redux/employeeSlice";
+import { updateEmployeeData, setIsEdit, deleteEmployeeData } from "../../redux/employeeSlice";
 
 import { Formik, useFormik } from "formik";
 
-import { useState } from "react";
-
-// styled input - when get the isEdit prop, the input will be disabled
 export const StyledInput = styled(TextField)(({ isEdit }) => ({
   "& .MuiInputBase-root": {
     color: "white",
@@ -46,8 +43,7 @@ export const EmployeeEditForm = () => {
     enableReinitialize: true,
   });
   function handleSubmit() {
-    // alert(JSON.stringify(formik.values, null, 2));
-    dispatch(updateEmployeeData(formik.values));
+    dispatch(updateEmployeeData({ ...currentEmployee, ...formik.values }));
   }
   if (!currentEmployee) return <div>Please choose employee from left pane...</div>;
   return (
@@ -161,7 +157,7 @@ export const EmployeeEditForm = () => {
             variant="outlined"
             color="error"
             onClick={() => {
-              setIsEdit(!isEdit);
+              dispatch(deleteEmployeeData(currentEmployee?.id));
             }}
           >
             Delete
