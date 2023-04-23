@@ -2,10 +2,10 @@ import "./App.css";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Unstable_Grid2";
 import CustomizedTreeView from "./components/elements/tree-view";
-import { EmployeeEditForm } from "./components/elements/employe-edit";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { createHierarchy } from "./redux/employeeSlice";
+import { Outlet } from "react-router-dom";
 
 function App() {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ function App() {
           <CustomizedTreeView />
         </Grid>
         <Grid xs={8}>
-          <EmployeeEditForm />
+          <Outlet />
         </Grid>
       </Grid>
     </Box>

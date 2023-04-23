@@ -9,12 +9,37 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import { store } from "./redux/store";
 import { Provider } from "react-redux";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import ErrorPage from "./components/elements/error-message";
+import { EmployeeEditForm } from "./components/elements/employe-edit";
+import { findEmployeeById } from "./utils";
+
+export async function loader({ params }) {
+  const response = findEmployeeById(params.id, store.getState().employee.employees);
+  console.log(`response`, response);
+  return response;
+}
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <ErrorPage />,
+    loader,
+    children: [
+      {
+        path: "/:id",
+        element: <EmployeeEditForm />,
+        loader,
+      },
+    ],
+  },
+]);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
   <Provider store={store}>
-    <App />
+    <RouterProvider router={router} />
   </Provider>
 );
 

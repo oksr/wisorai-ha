@@ -380,11 +380,11 @@ export const employeeSlice = createSlice({
       const employeesHierarchy = state.employees.reduce((acc, employee) => {
         const manager = employeesMap[employee.manager_id];
         if (manager) {
-          if (!manager.subordinates) {
-            manager.subordinates = [];
+          if (!manager.nodes) {
+            manager.nodes = [];
           }
-          if (!manager.subordinates.find((subordinate) => subordinate.id === employee.id)) {
-            manager.subordinates.push(employee);
+          if (!manager.nodes.find((child) => child.id === employee.id)) {
+            manager.nodes.push(employee);
           }
         } else {
           acc.push(employee);
@@ -396,21 +396,39 @@ export const employeeSlice = createSlice({
     },
     updateEmployeeData: (state, action) => {
       state.currentEmployee = { ...action.payload };
-      state.employeesTree = updateById(state.employeesTree, action.payload.id, action.payload);
+      state.employeesTree = updateItemInTree(
+        state.employeesTree,
+        action.payload.id,
+        action.payload
+      );
+      state.isEdit = false;
     },
     deleteEmployeeData: (state, action) => {
       state.currentEmployee = null;
-      state.employeesTree = removeItemfromArrayOfObjects(state.employeesTree, action.payload);
+      state.employeesTree = removeItemFromTree(state.employeesTree, action.payload);
     },
   },
 });
 
-function removeItemfromArrayOfObjects(array, id) {
-  return array.filter((item) => {
+function updateItemInTree(tree, id, newObject) {
+  return tree.map((item) => {
+    if (item.id === id) {
+      return newObject;
+    } else if (item.nodes) {
+      item.nodes = updateItemInTree(item.nodes, id, newObject);
+      return item;
+    } else {
+      return item;
+    }
+  });
+}
+
+function removeItemFromTree(tree, id) {
+  return tree.filter((item) => {
     if (item.id === id) {
       return false;
-    } else if (item.subordinates) {
-      item.subordinates = removeItemfromArrayOfObjects(item.subordinates, id);
+    } else if (item.nodes) {
+      item.nodes = removeItemFromTree(item.nodes, id);
       return true;
     } else {
       return true;
@@ -418,22 +436,6 @@ function removeItemfromArrayOfObjects(array, id) {
   });
 }
 
-function updateById(data, id, newObject) {
-  console.log("updateById");
-  console.log(`data.id: ${data.id} === id: ${id}`);
-  if (data.id === id) {
-    return newObject;
-  } else if (Array.isArray(data)) {
-    return data.map((item) => updateById(item, id, newObject));
-  } else if (typeof data === "object" && data !== null) {
-    return Object.entries(data).reduce((acc, [key, value]) => {
-      acc[key] = updateById(value, id, newObject);
-      return acc;
-    }, {});
-  } else {
-    return data;
-  }
-}
 export const {
   deleteEmployeeData,
   createHierarchy,
