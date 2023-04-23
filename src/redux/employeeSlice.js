@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import produce from "immer";
 
 const initialState = {
   isEdit: false,
@@ -373,7 +372,6 @@ export const employeeSlice = createSlice({
       state.isEdit = action.payload;
     },
     createHierarchy: (state, action) => {
-      console.log("createHierarchy");
       const employeesMap = state.employees.reduce((acc, employee) => {
         acc[employee.id] = employee;
         return acc;

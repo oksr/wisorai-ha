@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  react-ui:
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    ports:
+      - "3000:3000"
+    container_name: react-ui
+    stdin_open: true
+    volumes:
+       - /usr/src/app/wisor-ai-ha
+       - /usr/src/app/wisor-ai-ha/node_modules

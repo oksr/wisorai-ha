@@ -1,10 +1,10 @@
 import { useSelector, useDispatch } from "react-redux";
-import { Stack, TextField, Button, Typography, Grid, Paper, Avatar } from "@mui/material";
+import { Stack, TextField, Button, Typography, Avatar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import * as yup from "yup";
 import { updateEmployeeData, setIsEdit, deleteEmployeeData } from "../../redux/employeeSlice";
 
-import { Formik, useFormik } from "formik";
+import { useFormik } from "formik";
 
 export const StyledInput = styled(TextField)(({ isEdit }) => ({
   "& .MuiInputBase-root": {
@@ -16,10 +16,6 @@ export const StyledInput = styled(TextField)(({ isEdit }) => ({
 
 const validationSchema = yup.object({
   email: yup.string("Enter your email").email("Enter a valid email").required("Email is required"),
-  password: yup
-    .string("Enter your password")
-    .min(8, "Password should be of minimum 8 characters length")
-    .required("Password is required"),
 });
 
 export const EmployeeEditForm = () => {
@@ -47,9 +43,9 @@ export const EmployeeEditForm = () => {
   }
   if (!currentEmployee) return <div>Please choose employee from left pane...</div>;
   return (
-    <div>
+    <Stack>
       <form onSubmit={formik.handleSubmit} enableReinitialize={true}>
-        <Stack spacing={2} direction={"row"} alignItems={"center"}>
+        <Stack spacing={2} direction={"row"} alignItems={"center"} pr={5} minHeight={"200px"}>
           {!isEdit ? (
             <>
               <Avatar
@@ -178,6 +174,6 @@ export const EmployeeEditForm = () => {
           )}
         </Stack>
       </form>
-    </div>
+    </Stack>
   );
 };

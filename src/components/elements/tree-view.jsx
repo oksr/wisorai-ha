@@ -1,6 +1,5 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import SvgIcon from "@mui/material/SvgIcon";
 import { alpha, styled } from "@mui/material/styles";
 import TreeView from "@mui/lab/TreeView";
 import TreeItem, { treeItemClasses } from "@mui/lab/TreeItem";
@@ -31,15 +30,16 @@ function TransitionComponent(props) {
 }
 
 TransitionComponent.propTypes = {
-  /**
-   * Show the component; triggers the enter or exit states
-   */
   in: PropTypes.bool,
 };
 
 const StyledTreeItem = styled((props) => (
   <TreeItem {...props} TransitionComponent={TransitionComponent} />
 ))(({ theme }) => ({
+  [`& .${treeItemClasses.content}`]: {
+    marginTop: 4,
+    marginBottom: 4,
+  },
   [`& .${treeItemClasses.iconContainer}`]: {
     "& .close": {
       opacity: 0.3,
@@ -54,7 +54,6 @@ const StyledTreeItem = styled((props) => (
 
 const CustomTreeItem = ({ props }) => {
   const dispatch = useDispatch();
-
   const { nodeId, label, children, first_name, last_name, email, profile_pic, ...other } = props;
   return (
     <Stack
@@ -70,35 +69,25 @@ const CustomTreeItem = ({ props }) => {
       <Typography variant="body2" color="text.secondary" noWrap>
         {email}
       </Typography>
+      {props.subordinates && (
+        <Typography variant="body2" color="text.accent" noWrap>
+          {props.subordinates.length} employees
+        </Typography>
+      )}
     </Stack>
   );
 };
-function createHierarchyofEmployees(employees) {
-  const employeesMap = employees.reduce((acc, employee) => {
-    acc[employee.id] = employee;
-    return acc;
-  }, {});
 
-  // it should handle duplicate managers
-
-  const employeesHierarchy = employees.reduce((acc, employee) => {
-    const manager = employeesMap[employee.manager_id];
-    if (manager) {
-      if (!manager.subordinates) {
-        manager.subordinates = []; // this will mutate the original data
-        // create a new array instead
-      }
-      // it should handle duplicate employees, so we should check if the employee is already in the subordinates list
-      if (!manager.subordinates.find((subordinate) => subordinate.id === employee.id)) {
-        manager.subordinates.push(employee);
-      }
-    } else {
-      acc.push(employee);
-    }
-    return acc;
-  }, []);
-
-  return employeesHierarchy;
+function renderSubordinates(subordinates) {
+  return subordinates.map((subordinate) => (
+    <StyledTreeItem
+      key={subordinate.id}
+      nodeId={subordinate.id}
+      label={<CustomTreeItem props={subordinate} />}
+    >
+      {subordinate.subordinates && renderSubordinates(subordinate.subordinates)}
+    </StyledTreeItem>
+  ));
 }
 
 export default function CustomizedTreeView() {
@@ -111,34 +100,22 @@ export default function CustomizedTreeView() {
       defaultCollapseIcon={<FiChevronDown />}
       defaultExpandIcon={<FiChevronRight />}
       defaultEndIcon={<FiChevronRight opacity={"0.3"} />}
-      sx={{ height: "100vh", flexGrow: 1, maxWidth: "100%", overflowY: "auto" }}
+      sx={{
+        height: "100vh",
+        flexGrow: 1,
+        maxWidth: "100%",
+        overflowY: "auto",
+        borderRight: 1,
+        borderColor: "divider",
+      }}
     >
-      {/* A list of all employees (avatar, full name and email address)  */}
       {employeesHierarchy.map((employee) => (
         <StyledTreeItem
           key={employee.id}
           nodeId={employee.id}
           label={<CustomTreeItem props={employee} />}
         >
-          {/* A list of all subordinates (avatar, full name and email address) */}
-          {employee.subordinates &&
-            employee.subordinates.map((subordinate) => (
-              <StyledTreeItem
-                key={subordinate.id}
-                nodeId={subordinate.id}
-                label={<CustomTreeItem props={subordinate} />}
-              >
-                {/* A list of all subordinates (avatar, full name and email address) */}
-                {subordinate.subordinates &&
-                  subordinate.subordinates.map((subordinate) => (
-                    <StyledTreeItem
-                      key={subordinate.id}
-                      nodeId={subordinate.id}
-                      label={<CustomTreeItem props={subordinate} />}
-                    />
-                  ))}
-              </StyledTreeItem>
-            ))}
+          {employee.subordinates && renderSubordinates(employee.subordinates)}
         </StyledTreeItem>
       ))}
     </TreeView>
